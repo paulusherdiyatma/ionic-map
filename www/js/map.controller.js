@@ -1,6 +1,6 @@
 angular.module("starter")
-    .controller('MainCtrl', ['$scope', '$ionicModal',
-        function ($scope, $ionicModal) {
+    .controller('MainCtrl', ['$scope', '$ionicModal', '$http',
+        function ($scope, $ionicModal, $http) {
             var list_of_point = [{ lat: -8.743299, lng: 115.1734029, note: "Bandara" }, { lat: -8.802304, lng: 115.235949, note: "Nusa dua" }, { lat: -8.844827, lng: 115.185323, note: "Pandawa" }];
             $scope.map = new L.map('map');
             $scope.circle = {};
@@ -8,46 +8,20 @@ angular.module("starter")
             $scope.position = {};
             $scope.radius = 3000;
             $scope.data = {};
-            $scope.data.radius = 3000;
-            var geocoder = new google.maps.Geocoder();
 
-            $scope.searchAddress = function (data) {
-                $scope.getListOfPointWhithinCircleWithRadus(data.address);
-                $scope.radius = data.radius;
+            var options = {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
             }
-
-            navigator.geolocation.getCurrentPosition(showPosition);
+            navigator.geolocation.getCurrentPosition(showPosition, error, options);
             function showPosition(position) {
                 $scope.position = position.coords;
-                $scope.getListOfPointWhithinCircleWithRadus("");
+                $scope.setMap();
             }
 
-            $scope.getListOfPointWhithinCircleWithRadus = function (address) {
-                geocoder.geocode({ 'address': address }, function (results, status) {
-                    if (status == google.maps.GeocoderStatus.OK) {
-                        if (results.length > 1) {
-                            console.log(results[0])
-                            $scope.results = results;
-                            $ionicModal.fromTemplateUrl('select-modal.html', {
-                                scope: $scope,
-                                animation: 'slide-in-up'
-                            }).then(function (modal) {
-                                $scope.modal = modal;
-                                $scope.modal.show();
-                            });
-                        }
+            function error(error) {
 
-                        else {
-                            $scope.position = results[0].geometry.location;
-                            $scope.position.latitude = results[0].geometry.location.lat();
-                            $scope.position.longitude = results[0].geometry.location.lng();
-                            $scope.setMap();
-                        }
-                    }
-                    else {
-                        $scope.setMap();
-                    }
-                });
             }
 
             $scope.setMap = function () {
@@ -105,12 +79,30 @@ angular.module("starter")
                 $scope.map.setView(new L.LatLng($scope.position.latitude, $scope.position.longitude), 12).addLayer(osm);
             }
 
+            $scope.getLocation = function (val) {
+                return $http.get('//maps.googleapis.com/maps/api/geocode/json', {
+                    params: {
+                        address: val,
+                        components: "country:AU",
+                        sensor: false
 
-            $scope.select_result = function (result) {
-                $scope.modal.hide();
-                $scope.position = result.geometry.location;
-                $scope.position.latitude = result.geometry.location.lat();
-                $scope.position.longitude = result.geometry.location.lng();
+                    }
+                }).then(function (response) {
+                    return response.data.results.map(function (item) {
+                        return item;
+                    });
+                });
+            };
+
+            $scope.onSelect = function (item, model, label) {
+                $scope.position = {};
+                $scope.position.latitude = item.geometry.location.lat;
+                $scope.position.longitude = item.geometry.location.lng;
+                $scope.setMap();
+            }
+
+            $scope.radiusChange = function (radius) {
+                $scope.radius = radius;
                 $scope.setMap();
             }
         }]);

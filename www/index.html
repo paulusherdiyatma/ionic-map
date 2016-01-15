@@ -12,7 +12,11 @@
     <!-- IF using Sass (run gulp sass first), then uncomment below and remove the CSS includes above
     <link href="css/ionic.app.css" rel="stylesheet">
     -->
-
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-animate.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-animate.js"></script>
+    <script src="https://angular-ui.github.io/bootstrap/ui-bootstrap-tpls-1.0.3.js"></script>
+    <link href="https://netdna.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
     <!-- ionic/angularjs js -->
     <script src="lib/ionic/js/ionic.bundle.js"></script>
 
@@ -22,53 +26,38 @@
     <!-- your app's js -->
     <script src="js/app.js"></script>
     <script src="js/map.controller.js"></script>
-    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
-    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=places"></script>
-    <script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
+    <link rel="stylesheet" href="lib/leaflet/dist/leaflet.css" />
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
+    <script src="lib/leaflet/dist/leaflet.js"></script>
     <script src="lib/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+
 </head>
 
 <body ng-app="starter" ng-controller="MainCtrl">
 
     <ion-pane>
         <ion-content>
-
-
             <form class="list" style="margin:20px">
                 <div class="list">
-                    <label class="item item-input">
-                        <span class="input-label">Address</span>
-                        <input type="text" ng-model="data.address">
+                    <span class="input-label">Radius (in meters)</span>
+                    <input type="text" ng-model="radius" ng-change="radiusChange(radius)">
+                    <span class="input-label">Address</span>
+                    <input type="text" ng-model="data.address" placeholder="Address" uib-typeahead="address.formatted_address for address in getLocation($viewValue)"
+                    typeahead-editable="false" typeahead-on-select="onSelect($item, $model, $label)" typeahead-loading="loadingLocations"
+                    typeahead-no-results="noResults" class="form-control">
+                    <i ng-show="loadingLocations" class="glyphicon glyphicon-refresh"></i>
+                    <div ng-show="noResults">
+                        <i class="glyphicon glyphicon-remove"></i> No Results Found
+                    </div>
                     </label>
-                    <label class="item item-input">
-                        <span class="input-label">Radius (in meters)</span>
-                        <input type="text" ng-model="data.radius">
-                    </label>
-                    <button type="submit" class="button button-block button-positive" ng-click="searchAddress(data)">
-                        Search
-                    </button>
                 </div>
             </form>
             <div style="margin:20px">
                 <div id="map"></div>
-
             </div>
             </div>
         </ion-content>
     </ion-pane>
-    <script id="select-modal.html" type="text/ng-template">
-        <ion-modal-view>
-            <ion-header-bar>
-                <h1 class="title">Please Choose</h1>
-            </ion-header-bar>
-            <ion-content>
-                <div ng-repeat="result in results">
-                    <a href="" ng-click="select_result(result)">{{result.formatted_address}}<a>
-      </a>
-            </ion-content>
-        </ion-modal-view>
-    </script>
-
 </body>
 
 </html>
